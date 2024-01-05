@@ -66,9 +66,11 @@ export const NotationSender = ({
                                 <SendRecord onPress={async () => {
                                     setStartRecord(!startRecord);
 
-                                    realmdb.addData({ id: uuid, message: '', createAt: new Date(), audio: (await RecordAudio.stopRecording()).toString() });
-                                    
+                                    var audio = await RecordAudio.stopRecording();
+                                    realmdb.addData({ id: uuid, message: '', createAt: new Date(), audio: audio.toString() });
+
                                     getData(realmdb.getAllData());
+                                    console.log({ id: uuid, message: '', createAt: new Date(), audio: audio.toString() });
                                 }}>
                                     <IconEntypo name='controller-stop' color='#ffffff' size={40} />
                                 </SendRecord>

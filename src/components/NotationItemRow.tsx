@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import { Image } from '../models/types';
 import { colors } from '../shared/colors';
@@ -7,7 +7,7 @@ import { showMessage } from 'react-native-flash-message';
 import RNFS from 'react-native-fs';
 import VideoPlayer from 'react-native-video-player';
 import { GestureHandlerRootView, TouchableOpacity } from 'react-native-gesture-handler';
-import { Button } from 'react-native';
+import { Button, Text, View } from 'react-native';
 import AudioRecorder from '../utils/RecordAudio';
 import { AudioPlayer } from './AudioPlayer';
 
@@ -22,9 +22,11 @@ type NotationItemProps = {
 
 export const NotationItemRow = ({ onPress, title, image, id, reloadData, audio }: NotationItemProps): React.JSX.Element => {
 
-    const deleteMessage = (id: string) => realmdb.deleteData(id);
-
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
+
+    const [time, setTime] = useState<string>('00:00');
+
+    const deleteMessage = (id: string) => realmdb.deleteData(id);
 
     const handleDeleteMessage = () => {
         deleteMessage(id);
@@ -72,10 +74,28 @@ export const NotationItemRow = ({ onPress, title, image, id, reloadData, audio }
         return await AudioRecorder.startPlaying();
     };
 
+    const pausePlaying = async () => {
+        setIsPlaying(false);
+        return await AudioRecorder.audio.pausePlayer();
+    };
+
     const stopPlaying = async () => {
         setIsPlaying(false);
-        return await AudioRecorder.stopPlaying();
+        return await AudioRecorder.audio.stopPlayer();
     };
+
+    useEffect(() => {
+        AudioRecorder.audio.addPlayBackListener((e) => {
+            const position = e.currentPosition;
+            const minutes = Math.floor(position / 60000).toFixed(0).padStart(2, '0');
+            const seconds = ((position % 60000) / 1000).toFixed(0);
+            setTime(`${minutes}:${Number(seconds) < 10 ? '0' : ''}${seconds}`);
+
+            if (position === e.duration) stopPlaying();
+        });
+
+        return () => AudioRecorder.audio.removePlayBackListener();
+    }, []);
 
     const handleImageOrVideo = () => {
         if (image?.mime === 'video/mp4') {
@@ -97,22 +117,28 @@ export const NotationItemRow = ({ onPress, title, image, id, reloadData, audio }
                     </TouchableOpacity>
                 </GestureHandlerRootView>
             )
-        } else if (image?.mime === 'image/jpeg') {
+        } 
+        
+        if (image?.mime === 'image/jpeg') {
             return (
                 <ImageContainer onLongPress={() => handleDeleteImageFromDevice()}>
                     {image && image.path != null ? <ImageStyled source={{ uri: image.path }} /> : <></>}
                 </ImageContainer>
             )
-        } else if (title != '') {
+        } 
+        
+        if (title != '') {
             return (
                 <Container onPress={onPress} onLongPress={() => handleDeleteMessage()}>
                     <Title>{title}</Title>
                 </Container>
             )
-        } else if (audio != '') return <AudioPlayer onPress={isPlaying ? stopPlaying : startPlaying} isPlaying={isPlaying} />
+        } 
+        
+        if (audio !== '' && audio !== null) return <AudioPlayer time={time} onPress={isPlaying ? pausePlaying : startPlaying} isPlaying={isPlaying} />;
     }
 
-    return <>{handleImageOrVideo()}</>;
+    return <View>{handleImageOrVideo()}</View>;
 }
 
 const Container = styled.TouchableOpacity`

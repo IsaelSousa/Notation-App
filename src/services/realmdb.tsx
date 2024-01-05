@@ -53,14 +53,22 @@ class RealmDb {
                         mime: itemResp.image.mime,
                         path: itemResp.image.path,
                         width: itemResp.image.width
-                    }
+                    },
+                    audio: itemResp.audio
                 })
+            } else if (itemResp.audio !== '' && itemResp.audio !== null) {
+                data.push({
+                    id: itemResp.id,
+                    message: '',
+                    audio : itemResp.audio,
+                    createAt: new Date()
+                });
             } else {
                 data.push({
                     id: itemResp.id,
                     message: itemResp.message,
                     createAt: new Date()
-                })
+                });
             }
         });
 
