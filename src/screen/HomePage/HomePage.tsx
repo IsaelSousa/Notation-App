@@ -38,7 +38,7 @@ export const HomePage: React.FC<any> = () => {
 
     useEffect(() => {
         setData(realmdb.getAllData());
-    }, [])
+    }, []);
 
     return (
         <View style={styles.container}>

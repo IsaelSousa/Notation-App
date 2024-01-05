@@ -1,7 +1,7 @@
 import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 class AudioRecorder {
-    audio = new AudioRecorderPlayer();
+    public audio = new AudioRecorderPlayer();
 
     public async startRecording() {
         await this.audio.startRecorder();
@@ -19,6 +19,7 @@ class AudioRecorder {
     public async stopPlaying() {
         return await this.audio.stopPlayer();
     }
+
 }
 
 export default new AudioRecorder();
